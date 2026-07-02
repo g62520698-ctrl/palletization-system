@@ -1,0 +1,26 @@
+{
+    "name": "CargaCerta — Simulador Logístico",
+    "short_name": "CargaCerta",
+    "description": "Simulador profissional de Endereçamento e Paletização PBR para logística e armazenagem",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#10141B",
+    "theme_color": "#FF6A2B",
+    "orientation": "any",
+    "lang": "pt-BR",
+    "categories": ["business", "productivity", "utilities"],
+    "icons": [
+        {
+            "src": "icons/icon-192.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any"
+        },
+        {
+            "src": "icons/icon-512.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "maskable"
+        }
+    ]
+}

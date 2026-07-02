@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CargaCerta — Simulador Logístico</title>
+    <meta name="description" content="Simulador profissional de Endereçamento e Paletização PBR">
+    <meta name="theme-color" content="#10141B">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/svg+xml" href="icons/icon-192.svg">
+    <link rel="apple-touch-icon" href="icons/icon-192.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- ========== HEADER ========== -->
+    <header id="app-header">
+        <div class="header-inner">
+            <div class="header-left">
+                <div class="logo">
+                    <svg class="logo-icon" width="34" height="34" viewBox="0 0 34 34" fill="none">
+                        <rect x="2" y="9" width="30" height="22" rx="2.5" stroke="#FF6A2B" stroke-width="2"/>
+                        <line x1="2" y1="16" x2="32" y2="16" stroke="#FF6A2B" stroke-width="1.8"/>
+                        <line x1="17" y1="9" x2="17" y2="16" stroke="#FF6A2B" stroke-width="1.8"/>
+                        <rect x="7" y="3" width="7" height="6" rx="1" stroke="#3E8EFF" stroke-width="1.3"/>
+                        <rect x="20" y="3" width="7" height="6" rx="1" stroke="#3E8EFF" stroke-width="1.3"/>
+                    </svg>
+                    <div class="logo-text-wrap">
+                        <span class="logo-text">CargaCerta</span>
+                        <span class="logo-sub">Simulador Logístico</span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div id="online-indicator" class="online-indicator" data-tooltip="Online">
+                    <span class="online-dot"></span>
+                    <span class="online-label">Online</span>
+                </div>
+                <button id="install-btn" class="install-btn hidden" onclick="installApp()" data-tooltip="Instalar aplicativo">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    <span>Instalar</span>
+                </button>
+            </div>
+        </div>
+        <nav class="tabs-bar">
+            <button class="tab active" data-tab="endereco" onclick="switchTab('endereco')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                Endereçamento
+            </button>
+            <button class="tab" data-tab="pallet" onclick="switchTab('pallet')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="20" width="22" height="3" rx=".5"/><rect x="3" y="4" width="18" height="16" rx="1"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="4" x2="12" y2="10"/></svg>
+                Paletização PBR
+            </button>
+        </nav>
+    </header>
+
+    <!-- ========== LOADING ========== -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <span>Calculando...</span>
+    </div>
+
+    <!-- ========== MAIN ========== -->
+    <main>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             ENDEREÇAMENTO
+             ═══════════════════════════════════════════════════════════ -->
+        <section id="panel-endereco" class="panel active">
+            <div class="panel-grid">
+
+                <!-- Coluna esquerda — Formulários -->
+                <aside class="form-sidebar">
+                    <form id="form-endereco" onsubmit="calcularEnderecamento(event)" novalidate>
+
+                        <!-- Card 1 — Endereço -->
+                        <div class="form-card">
+                            <div class="form-card-title">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                                Endereço de Picking
+                            </div>
+                            <div class="fields-3">
+                                <div class="field">
+                                    <label for="end-c">Comprimento <span class="unit">cm</span></label>
+                                    <input type="number" id="end-c" min="0.1" step="0.1" placeholder="120" required>
+                                </div>
+                                <div class="field">
+                                    <label for="end-l">Largura <span class="unit">cm</span></label>
+                                    <input type="number" id="end-l" min="0.1" step="0.1" placeholder="100" required>
+                                </div>
+                                <div class="field">
+                                    <label for="end-a">Altura <span class="unit">cm</span></label>
+                                    <input type="number" id="end-a" min="0.1" step="0.1" placeholder="200" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2 — Caixa -->
+                        <div class="form-card">
+                            <div class="form-card-title">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+                                Caixa / Fardo
+                            </div>
+                            <div class="fields-3">
+                                <div class="field">
+                                    <label for="cx-c">Comprimento <span class="unit">cm</span></label>
+                                    <input type="number" id="cx-c" min="0.1" step="0.1" placeholder="30" required>
+                                </div>
+                                <div class="field">
+                                    <label for="cx-l">Largura <span class="unit">cm</span></label>
+                                    <input type="number" id="cx-l" min="0.1" step="0.1" placeholder="20" required>
+                                </div>
+                                <div class="field">
+                                    <label for="cx-a">Altura <span class="unit">cm</span></label>
+                                    <input type="number" id="cx-a" min="0.1" step="0.1" placeholder="15" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="err-end" class="error-msg hidden"></div>
+                        <button type="submit" class="btn-calc">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                            Calcular Ocupação
+                        </button>
+                    </form>
+                </aside>
+
+                <!-- Coluna direita — Resultados e Visualizações -->
+                <div class="result-area">
+                    <div id="res-end" class="result-content hidden">
+                        <!-- Dashboard de cards -->
+                        <div class="dashboard">
+                            <div class="card card-highlight" data-tooltip="Quantidade máxima de unidades">
+                                <span class="card-label">Unidades</span>
+                                <span class="card-value" id="r-end-qtd">—</span>
+                            </div>
+                            <div class="card" data-tooltip="Taxa de ocupação volumétrica">
+                                <span class="card-label">Ocupação</span>
+                                <span class="card-value" id="r-end-ocup">—</span>
+                            </div>
+                            <div class="card" data-tooltip="Espaço não utilizado">
+                                <span class="card-label">Espaço Vazio</span>
+                                <span class="card-value" id="r-end-vazio">—</span>
+                            </div>
+                            <div class="card" data-tooltip="Disposição nos eixos C × L × A">
+                                <span class="card-label">Arranjo</span>
+                                <span class="card-value" id="r-end-arranjo">—</span>
+                            </div>
+                            <div class="card" data-tooltip="Orientação da caixa no endereço">
+                                <span class="card-label">Orientação</span>
+                                <span class="card-value" id="r-end-orient">—</span>
+                            </div>
+                            <div class="card" data-tooltip="Volume efetivamente utilizado">
+                                <span class="card-label">Vol. Utilizado</span>
+                                <span class="card-value" id="r-end-vutil">—</span>
+                            </div>
+                            <div class="card" data-tooltip="Volume não ocupado">
+                                <span class="card-label">Vol. Livre</span>
+                                <span class="card-value" id="r-end-vlivre">—</span>
+                            </div>
+                            <div class="card" data-tooltip="Volume total do endereço">
+                                <span class="card-label">Vol. Total</span>
+                                <span class="card-value" id="r-end-vtotal">—</span>
+                            </div>
+                            <div class="card" data-tooltip="Eficiência volumétrica">
+                                <span class="card-label">Eficiência</span>
+                                <span class="card-value" id="r-end-efic">—</span>
+                            </div>
+                        </div>
+
+                        <!-- Barra de ocupação -->
+                        <div class="bar-section">
+                            <div class="bar-header">
+                                <span>Ocupação do Endereço</span>
+                                <span class="mono" id="r-end-bar-pct">0%</span>
+                            </div>
+                            <div class="bar-track"><div class="bar-fill" id="r-end-bar"></div></div>
+                        </div>
+
+                        <!-- Visualizações -->
+                        <div class="viz-section">
+                            <div class="viz-toolbar">
+                                <div class="viz-tabs">
+                                    <button class="viz-tab active" data-endviz="topo" onclick="switchEndViz('topo')">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+                                        Vista Superior
+                                    </button>
+                                    <button class="viz-tab" data-endviz="iso" onclick="switchEndViz('iso')">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                                        Isométrica
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="end-viz-topo" class="viz-panel">
+                                <div id="svg-end" class="svg-viewport"></div>
+                            </div>
+                            <div id="end-viz-iso" class="viz-panel hidden">
+                                <div id="svg-end-iso" class="svg-viewport"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="empty-end" class="empty-state">
+                        <svg width="72" height="72" viewBox="0 0 72 72" fill="none" stroke="#2D3A4E" stroke-width="1.5">
+                            <rect x="8" y="18" width="56" height="44" rx="4"/><line x1="8" y1="30" x2="64" y2="30"/>
+                            <line x1="36" y1="18" x2="36" y2="30"/><rect x="16" y="6" width="14" height="12" rx="2"/>
+                            <rect x="42" y="6" width="14" height="12" rx="2"/>
+                        </svg>
+                        <p>Insira as dimensões e pressione <strong>Calcular Ocupação</strong></p>
+                        <span class="empty-hint">Atalho: Enter para calcular · Esc para limpar</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             PALETIZAÇÃO
+             ═══════════════════════════════════════════════════════════ -->
+        <section id="panel-pallet" class="panel">
+            <div class="panel-grid">
+
+                <!-- Coluna esquerda — Formulários -->
+                <aside class="form-sidebar">
+                    <form id="form-pallet" onsubmit="calcularPaletizacao(event)" novalidate>
+
+                        <div class="pallet-info">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF6A2B" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                            Pallet PBR <span class="mono">100 × 120 cm</span> · Altura pallet <span class="mono">15 cm</span>
+                        </div>
+
+                        <!-- Card 1 — Caixa -->
+                        <div class="form-card">
+                            <div class="form-card-title">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+                                Caixa / Fardo
+                            </div>
+                            <div class="fields-3">
+                                <div class="field">
+                                    <label for="pc-c">Comprimento <span class="unit">cm</span></label>
+                                    <input type="number" id="pc-c" min="0.1" step="0.1" placeholder="40" required>
+                                </div>
+                                <div class="field">
+                                    <label for="pc-l">Largura <span class="unit">cm</span></label>
+                                    <input type="number" id="pc-l" min="0.1" step="0.1" placeholder="30" required>
+                                </div>
+                                <div class="field">
+                                    <label for="pc-a">Altura <span class="unit">cm</span></label>
+                                    <input type="number" id="pc-a" min="0.1" step="0.1" placeholder="20" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2 — Configuração -->
+                        <div class="form-card">
+                            <div class="form-card-title">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                                Configuração
+                            </div>
+                            <div class="fields-1">
+                                <div class="field">
+                                    <label for="p-alt-max">Altura máxima de carga <span class="unit">cm</span></label>
+                                    <input type="number" id="p-alt-max" min="1" step="0.1" value="160" required>
+                                </div>
+                            </div>
+                            <div class="fields-2">
+                                <div class="field">
+                                    <label for="p-peso">Peso caixa <span class="unit">kg</span> <small>opc.</small></label>
+                                    <input type="number" id="p-peso" min="0" step="0.1" placeholder="5">
+                                </div>
+                                <div class="field">
+                                    <label for="p-cap">Capacidade pallet <span class="unit">kg</span> <small>opc.</small></label>
+                                    <input type="number" id="p-cap" min="1" step="0.1" value="1000">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="err-pal" class="error-msg hidden"></div>
+                        <button type="submit" class="btn-calc">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="20" width="22" height="3" rx=".5"/><rect x="3" y="4" width="18" height="16" rx="1"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="4" x2="12" y2="10"/></svg>
+                            Calcular Paletização
+                        </button>
+                    </form>
+                </aside>
+
+                <!-- Coluna direita — Resultados e Visualizações -->
+                <div class="result-area">
+                    <div id="res-pal" class="result-content hidden">
+                        <!-- Dashboard -->
+                        <div class="dashboard">
+                            <div class="card card-highlight" data-tooltip="Total de caixas no pallet">
+                                <span class="card-label">Caixas</span>
+                                <span class="card-value" id="r-pal-total">—</span>
+                            </div>
+                            <div class="card" data-tooltip="Caixas em cada camada">
+                                <span class="card-label">Cx/Camada</span>
+                                <span class="card-value" id="r-pal-cxcl">—</span>
+                            </div>
+                            <div class="card" data-tooltip="Número de camadas empilhadas">
+                                <span class="card-label">Camadas</span>
+                                <span class="card-value" id="r-pal-cam">—</span>
+                            </div>
+                            <div class="card" data-tooltip="Altura total incluindo pallet">
+                                <span class="card-label">Altura</span>
+                                <span class="card-value" id="r-pal-alt">—</span>
+                            </div>
+                            <div class="card" data-tooltip="Área da base ocupada pelas caixas">
+                                <span class="card-label">Cobertura</span>
+                                <span class="card-value" id="r-pal-cob">—</span>
+                            </div>
+                            <div class="card" data-tooltip="Eficiência volumétrica do empacotamento">
+                                <span class="card-label">Eficiência</span>
+                                <span class="card-value" id="r-pal-efic">—</span>
+                            </div>
+                            <div class="card" data-tooltip="Peso total estimado" id="card-pal-peso">
+                                <span class="card-label">Peso</span>
+                                <span class="card-value" id="r-pal-peso">—</span>
+                            </div>
+                            <div class="card" data-tooltip="Volume total ocupado pelas caixas">
+                                <span class="card-label">Vol. Ocupado</span>
+                                <span class="card-value" id="r-pal-vol">—</span>
+                            </div>
+                            <div class="card" data-tooltip="Tipo de amarração entre camadas">
+                                <span class="card-label">Amarração</span>
+                                <span class="card-value" id="r-pal-amar">—</span>
+                            </div>
+                            <div class="card card-stab" data-tooltip="Índice de estabilidade da carga (0-100)">
+                                <span class="card-label">Estabilidade</span>
+                                <span class="card-value" id="r-pal-estab">—</span>
+                                <div class="card-bar-track"><div class="card-bar-fill" id="r-pal-estab-bar"></div></div>
+                                <span class="card-sublabel" id="r-pal-estab-class">—</span>
+                            </div>
+                        </div>
+
+                        <!-- Qualidade -->
+                        <div class="quality-strip">
+                            <div class="quality-left">
+                                <div class="quality-score" id="r-pal-score">—</div>
+                                <div class="quality-details">
+                                    <span class="quality-badge" id="r-pal-class">—</span>
+                                    <span class="quality-seal" id="r-pal-seal">—</span>
+                                </div>
+                            </div>
+                            <div class="quality-right">
+                                <div class="bar-header">
+                                    <span>Cobertura da Base</span>
+                                    <span class="mono" id="r-pal-bar-pct">0%</span>
+                                </div>
+                                <div class="bar-track"><div class="bar-fill" id="r-pal-bar"></div></div>
+                            </div>
+                        </div>
+
+                        <!-- Visualizações -->
+                        <div class="viz-section">
+                            <div class="viz-toolbar">
+                                <div class="viz-tabs">
+                                    <button class="viz-tab active" data-viz="topo" onclick="switchViz('topo')">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+                                        Vista Superior
+                                    </button>
+                                    <button class="viz-tab" data-viz="iso" onclick="switchViz('iso')">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                                        Isométrica
+                                    </button>
+                                </div>
+                                <div class="viz-controls">
+                                    <div id="layer-nav" class="layer-nav hidden">
+                                        <button onclick="changeLayer(-1)" id="btn-lprev" class="layer-btn">‹</button>
+                                        <span id="layer-label" class="mono">Camada 1/1</span>
+                                        <button onclick="changeLayer(1)" id="btn-lnext" class="layer-btn">›</button>
+                                    </div>
+                                    <button id="btn-rotate" class="layer-btn hidden" onclick="toggleRotation()" data-tooltip="Girar 90°">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="viz-topo" class="viz-panel">
+                                <div id="svg-pal-topo" class="svg-viewport"></div>
+                            </div>
+                            <div id="viz-iso" class="viz-panel hidden">
+                                <div id="svg-pal-iso" class="svg-viewport"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="empty-pal" class="empty-state">
+                        <svg width="72" height="72" viewBox="0 0 72 72" fill="none" stroke="#2D3A4E" stroke-width="1.5">
+                            <rect x="4" y="54" width="64" height="10" rx="2"/><rect x="10" y="8" width="52" height="46" rx="3"/>
+                            <line x1="10" y1="24" x2="62" y2="24"/><line x1="10" y1="40" x2="62" y2="40"/>
+                            <line x1="36" y1="8" x2="36" y2="24"/>
+                        </svg>
+                        <p>Configure as dimensões e pressione <strong>Calcular Paletização</strong></p>
+                        <span class="empty-hint">Atalho: Enter para calcular · Esc para limpar</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="app-footer">
+        Desenvolvido por Guilherme Lopes
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
